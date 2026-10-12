@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000" id="themeColor">
+<meta name="format-detection" content="telephone=no">
+<title>Una domanda per stasera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #000;
+    --neon: #39ff14;
+    --calm: #3e7a5b;
+    --calm-deep: #2f6049;
+    --white: #fff;
+    --serif: "Fraunces", Georgia, "Times New Roman", serif;
+    --mono: "Space Mono", "Courier New", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; margin: 0; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--black);
+    color: var(--neon);
+    font-family: var(--serif);
+    transition: background-color 1.6s ease;
+    overflow-x: hidden;
+  }
+  body.calm { background: var(--calm); color: var(--white); }
+
+  /* Cuoricini */
+  #hearts {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 1s ease;
+  }
+  #hearts.dim { opacity: .22; }
+
+  .heart {
+    position: absolute;
+    line-height: 1;
+    scale: 0;
+    opacity: 0;
+    animation:
+      pop .6s cubic-bezier(.2, 1.6, .4, 1) var(--delay) forwards,
+      bob var(--dur) ease-in-out calc(var(--delay) + .6s) infinite alternate;
+  }
+  @keyframes pop { to { scale: 1; opacity: .92; } }
+  @keyframes bob { from { translate: 0 0; } to { translate: var(--dx) var(--dy); } }
+
+  /* Layout comune */
+  main {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding:
+      calc(2rem + env(safe-area-inset-top, 0px))
+      calc(1.25rem + env(safe-area-inset-right, 0px))
+      calc(2rem + env(safe-area-inset-bottom, 0px))
+      calc(1.25rem + env(safe-area-inset-left, 0px));
+  }
+  section[hidden] { display: none; }
+
+  /* Schermata 1: il finto phishing */
+  #intro { text-align: center; max-width: 34rem; }
+  #introText {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: clamp(1.3rem, 4.6vw, 2.4rem);
+    line-height: 1.4;
+    color: var(--neon);
+    text-shadow: 0 0 8px rgba(57, 255, 20, .7), 0 0 24px rgba(57, 255, 20, .35);
+    opacity: 1;
+    transition: opacity .6s ease;
+  }
+  #introText::after {
+    content: "_";
+    margin-left: .1em;
+    animation: blink 1s steps(1) infinite;
+  }
+  #introText.fade { opacity: 0; }
+  #introText.alt {
+    font-family: var(--serif);
+    font-weight: 600;
+    color: var(--white);
+    text-shadow: none;
+    line-height: 1.3;
+  }
+  #introText.alt::after { content: none; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Schermata 2: la domanda */
+  #ask { text-align: center; max-width: 36rem; }
+  #ask h1 {
+    margin: 0 0 2.2rem;
+    font-weight: 600;
+    font-size: clamp(2.2rem, 8vw, 4.2rem);
+    line-height: 1.12;
+    text-shadow: 0 2px 18px rgba(30, 70, 50, .55);
+    animation: rise .7s ease both;
+  }
+  @keyframes rise { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }
+
+  .buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; min-height: 4rem; }
+
+  button {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    font-weight: 600;
+    border-radius: 999px;
+    min-height: 3.25rem;
+    min-width: 7rem;
+    padding: .85rem 2.4rem;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    border: 2px solid var(--white);
+    transition: transform .15s ease, background-color .15s ease, color .15s ease, opacity .35s ease, scale .35s ease;
+  }
+  button:focus-visible { outline: 3px solid #ffe3ea; outline-offset: 3px; }
+  button:active { transform: scale(.97); }
+
+  .primary { background: var(--white); color: var(--calm-deep); }
+  .primary:hover { background: #f1fff7; }
+  .secondary { background: transparent; color: var(--white); text-shadow: 0 1px 8px rgba(30, 70, 50, .6); }
+  .secondary:hover { background: rgba(255, 255, 255, .15); }
+  #no.gone { opacity: 0; scale: .6; pointer-events: none; }
+
+  /* Schermata 3: il form */
+  #plan { width: 100%; max-width: 40rem; }
+  #plan h2 {
+    margin: 0 0 .4rem;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 6vw, 2.8rem);
+    line-height: 1.15;
+  }
+  #plan .lead { margin: 0 0 2rem; font-size: 1.1rem; opacity: .92; }
+
+  fieldset { border: 0; margin: 0 0 1.8rem; padding: 0; min-width: 0; }
+  legend, .field-label {
+    display: block;
+    padding: 0;
+    margin: 0 0 .7rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  input[type="time"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    min-width: 9.5rem;
+    min-height: 3.2rem;
+    text-align: left;
+    color-scheme: dark;
+    font: inherit;
+    font-size: 1.3rem;
+    color: var(--white);
+    background: rgba(255, 255, 255, .14);
+    border: 1.5px solid rgba(255, 255, 255, .7);
+    border-radius: 12px;
+    padding: .6rem .9rem;
+  }
+  input[type="time"]::-webkit-date-and-time-value { text-align: left; }
+  input[type="time"]:focus-visible { outline: 3px solid #ffe3ea; outline-offset: 3px; }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: .9rem;
+    padding: 1rem 1.1rem;
+    margin: 0 0 .7rem;
+    border: 1.5px solid rgba(255, 255, 255, .6);
+    border-radius: 14px;
+    cursor: pointer;
+    line-height: 1.5;
+    transition: background-color .2s ease, color .2s ease;
+  }
+  .option:hover { background: rgba(255, 255, 255, .1); }
+  .option input[type="radio"] {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: none;
+    width: 1.3rem;
+    height: 1.3rem;
+    margin: .2rem 0 0;
+    border: 2px solid var(--white);
+    border-radius: 50%;
+    background: transparent;
+  }
+  .option:has(input:checked) { background: var(--white); color: var(--calm-deep); border-color: var(--white); }
+  .option input[type="radio"]:checked {
+    border-color: var(--calm-deep);
+    background: radial-gradient(circle, var(--calm-deep) 42%, transparent 48%);
+  }
+  .option:has(input:focus-visible) { outline: 3px solid #ffe3ea; outline-offset: 3px; }
+
+  .option.open { align-items: center; }
+  .option.open input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    color: inherit;
+    background: rgba(255, 255, 255, .14);
+    border: 0;
+    border-radius: 8px;
+    padding: .5rem .7rem;
+  }
+  .option.open input[type="text"]::placeholder { color: inherit; opacity: .7; }
+  .option.open input[type="text"]:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+  .option.open:has(input[type="radio"]:checked) input[type="text"] { background: rgba(62, 122, 91, .12); }
+
+  #error { min-height: 1.5rem; margin: 0 0 1rem; font-weight: 600; color: #ffe3ea; }
+  #fallback { margin: 0 0 1rem; }
+  #fallback a { color: var(--white); }
+
+  /* Schermata finale */
+  #done { text-align: center; max-width: 30rem; }
+  #done h2 { margin: 0 0 .8rem; font-size: clamp(2rem, 7vw, 3.2rem); font-weight: 600; line-height: 1.15; }
+  #done p { margin: 0; font-size: 1.2rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    body, #introText, button, .option, #hearts { transition-duration: .01s; }
+    .heart { animation: pop .01s linear var(--delay) forwards; }
+    #ask h1 { animation: none; }
+    #introText::after { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div id="hearts" aria-hidden="true"></div>
+
+<main>
+  <section id="intro" aria-live="polite">
+    <p id="introText">Questo è un tentativo di phishing</p>
+  </section>
+
+  <section id="ask" hidden>
+    <h1>Stasera vuoi uscire con me?</h1>
+    <div class="buttons">
+      <button type="button" id="yes" class="primary">Sì</button>
+      <button type="button" id="no" class="secondary">No</button>
+    </div>
+  </section>
+
+  <section id="plan" hidden>
+    <h2>Perfetto. Ora organizziamo.</h2>
+    <p class="lead">Scegli l'orario e cosa fare, poi invia la risposta.</p>
+
+    <form id="planForm" novalidate>
+      <div style="margin-bottom:1.8rem">
+        <label class="field-label" for="orario">A che ora?</label>
+        <input type="time" id="orario" name="orario" value="20:00" required>
+      </div>
+
+      <fieldset>
+        <legend>Cosa facciamo?</legend>
+
+        <label class="option">
+          <input type="radio" name="attivita" value="Escape Room">
+          <span>Escape Room</span>
+        </label>
+
+        <label class="option">
+          <input type="radio" name="attivita" value="Cinema: ridanno Il Dottor Stranamore">
+          <span>Al cinema ridanno <em>Il Dottor Stranamore</em>, un film che mi piacerebbe molto vedere ma è impegnativo</span>
+        </label>
+
+        <label class="option">
+          <input type="radio" name="attivita" value="Comprare una busta per risolvere un caso insieme">
+          <span>Comprare una di quelle buste di cui mi parlavi e risolvere un caso insieme</span>
+        </label>
+
+        <label class="option">
+          <input type="radio" name="attivita" value="Serata pizza, birra e film in camera sua (Harry Potter)">
+          <span>Serata pizza, birra e film in camera mia, sotto la mia nuova bellissima coperta. Si potrebbe guardare Harry Potter: tu volevi fare un rewatch e io non l'ho mai visto</span>
+        </label>
+
+        <label class="option open">
+          <input type="radio" name="attivita" value="__altro__" id="altroRadio" aria-label="La mia proposta">
+          <input type="text" id="altroTesto" name="proposta" placeholder="proponi tu" autocomplete="off" aria-label="La tua proposta">
+        </label>
+      </fieldset>
+
+      <p id="error" role="alert"></p>
+      <p id="fallback" hidden></p>
+
+      <button type="submit" id="send" class="primary">Invia la risposta</button>
+    </form>
+  </section>
+
+  <section id="done" hidden>
+    <h2>Fatto!</h2>
+    <p>Michele ha ricevuto la tua risposta. A stasera.</p>
+  </section>
+</main>
+
+<script>
+  // ⚠️ Metti qui il TUO indirizzo email: è dove arriverà la risposta.
+  const EMAIL = "michele.castrucci002@gmail.com";
+
+  const $ = (id) => document.getElementById(id);
+  const body = document.body;
+  const hearts = $("hearts");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- Cuoricini ---------- */
+  function fillHearts() {
+    const palette = ["#ffffff", "#ffd1dc", "#ff8fa3", "#ff5d7a", "#ffc2d1"];
+    const area = window.innerWidth * window.innerHeight;
+    const count = Math.max(55, Math.min(150, Math.round(area / 9000)));
+    for (let i = 0; i < count; i++) {
+      const h = document.createElement("span");
+      h.className = "heart";
+      h.textContent = "♥";
+      const size = (14 + Math.random() * 44) * Math.min(1, window.innerWidth / 700 + 0.45);
+      h.style.left = (Math.random() * 96) + "%";
+      h.style.top = (Math.random() * 94) + "%";
+      h.style.fontSize = size + "px";
+      h.style.color = palette[Math.floor(Math.random() * palette.length)];
+      h.style.setProperty("--delay", (i * 0.03) + "s");
+      h.style.setProperty("--dur", (4 + Math.random() * 5) + "s");
+      h.style.setProperty("--dx", ((Math.random() - .5) * 28) + "px");
+      h.style.setProperty("--dy", ((Math.random() - .5) * 36) + "px");
+      hearts.appendChild(h);
+    }
+  }
+
+  /* ---------- Sequenza iniziale ---------- */
+  const introText = $("introText");
+
+  // dopo 5 secondi: sfondo verde rilassante e nuova scritta
+  setTimeout(() => {
+    body.classList.add("calm");
+    $("themeColor").setAttribute("content", "#3e7a5b");
+    introText.classList.add("fade");
+    setTimeout(() => {
+      introText.textContent = "Scherzo, mi ha programmato Michele.";
+      introText.classList.add("alt");
+      introText.classList.remove("fade");
+
+      // dopo altri 2 secondi: cuoricini e domanda
+      setTimeout(() => {
+        $("intro").hidden = true;
+        $("ask").hidden = false;
+        fillHearts();
+        $("yes").focus({ preventScroll: true });
+      }, 2000);
+    }, reduceMotion ? 20 : 600);
+  }, 5000);
+
+  /* ---------- Sì / No ---------- */
+  $("no").addEventListener("click", () => {
+    const no = $("no");
+    no.classList.add("gone");
+    no.setAttribute("aria-hidden", "true");
+    no.tabIndex = -1;
+    setTimeout(() => { no.hidden = true; }, 400);
+    $("yes").focus({ preventScroll: true });
+  });
+
+  $("yes").addEventListener("click", () => {
+    $("ask").hidden = true;
+    $("plan").hidden = false;
+    hearts.classList.add("dim");
+    window.scrollTo(0, 0);
+  });
+
+  /* ---------- Form ---------- */
+  // scrivere nel campo libero seleziona in automatico quell'opzione
+  $("altroTesto").addEventListener("input", () => { $("altroRadio").checked = true; });
+  $("altroTesto").addEventListener("focus", () => { $("altroRadio").checked = true; });
+
+  const form = $("planForm");
+  const errorEl = $("error");
+  const fallbackEl = $("fallback");
+  const sendBtn = $("send");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorEl.textContent = "";
+    fallbackEl.hidden = true;
+
+    const orario = $("orario").value;
+    const scelta = form.querySelector('input[name="attivita"]:checked');
+    const proposta = $("altroTesto").value.trim();
+
+    if (!orario) {
+      errorEl.textContent = "Scegli un orario.";
+      $("orario").focus();
+      return;
+    }
+    if (!scelta) {
+      errorEl.textContent = "Scegli un'attività o scrivi la tua proposta.";
+      return;
+    }
+
+    let attivita = scelta.value;
+    if (attivita === "__altro__") {
+      if (!proposta) {
+        errorEl.textContent = "Scrivi la tua proposta nel campo libero.";
+        $("altroTesto").focus();
+        return;
+      }
+      attivita = "Proposta sua: " + proposta;
+    }
+
+    const oggetto = "Risposta al tuo invito di stasera";
+    sendBtn.disabled = true;
+    sendBtn.textContent = "Invio in corso…";
+
+    try {
+      const res = await fetch("https://formsubmit.co/ajax/" + encodeURIComponent(EMAIL), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          _subject: oggetto,
+          _captcha: "false",
+          _template: "table",
+          Orario: orario,
+          Attività: attivita
+        })
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      if (data.success === false || data.success === "false") throw new Error("rifiutato");
+
+      $("plan").hidden = true;
+      $("done").hidden = false;
+      hearts.classList.remove("dim");
+      window.scrollTo(0, 0);
+    } catch (err) {
+      // piano B: apre il programma di posta con la risposta già scritta
+      const testo = "Orario: " + orario + "\nAttività: " + attivita;
+      const link = "mailto:" + EMAIL + "?subject=" + encodeURIComponent(oggetto) + "&body=" + encodeURIComponent(testo);
+      errorEl.textContent = "Non sono riuscito a inviare la risposta in automatico.";
+      fallbackEl.innerHTML = "";
+      const a = document.createElement("a");
+      a.href = link;
+      a.textContent = "Invia la risposta dal tuo programma di posta";
+      fallbackEl.appendChild(a);
+      fallbackEl.hidden = false;
+      sendBtn.disabled = false;
+      sendBtn.textContent = "Riprova";
+    }
+  });
+</script>
+</body>
+</html>
