@@ -104,12 +104,19 @@
   /* Schermata 2: la domanda */
   #ask { text-align: center; max-width: 36rem; }
   #ask h1 {
-    margin: 0 0 2.2rem;
+    margin: 0 0 1rem;
     font-weight: 600;
     font-size: clamp(2.2rem, 8vw, 4.2rem);
     line-height: 1.12;
     text-shadow: 0 2px 18px rgba(30, 70, 50, .55);
     animation: rise .7s ease both;
+  }
+  #ask .sweet {
+    margin: 0 0 2.2rem;
+    font-size: clamp(1.1rem, 4vw, 1.4rem);
+    line-height: 1.5;
+    text-shadow: 0 2px 14px rgba(30, 70, 50, .55);
+    animation: rise .7s ease .2s both;
   }
   @keyframes rise { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }
 
@@ -227,6 +234,20 @@
   #fallback { margin: 0 0 1rem; }
   #fallback a { color: var(--white); }
 
+  /* Sticker di cuori */
+  .sticker {
+    display: inline-block;
+    width: 1.35em;
+    height: 1.35em;
+    vertical-align: -.3em;
+    margin: 0 .04em;
+    rotate: var(--r, 0deg);
+    filter: drop-shadow(0 2px 2px rgba(20, 50, 35, .35));
+    animation: stick .5s cubic-bezier(.2, 1.6, .4, 1) calc(var(--i, 0) * .09s + .1s) both;
+  }
+  @keyframes stick { from { scale: 0; } to { scale: 1; } }
+  #done h2 .sticker { width: 1.2em; height: 1.2em; }
+
   /* Schermata finale */
   #done { text-align: center; max-width: 30rem; }
   #done h2 { margin: 0 0 .8rem; font-size: clamp(2rem, 7vw, 3.2rem); font-weight: 600; line-height: 1.15; }
@@ -235,17 +256,55 @@
   @media (prefers-reduced-motion: reduce) {
     body, #introText, button, .option, #hearts { transition-duration: .01s; }
     .heart { animation: pop .01s linear var(--delay) forwards; }
-    #ask h1 { animation: none; }
+    #ask h1, #ask .sweet, .sticker { animation: none; }
     #introText::after { animation: none; }
   }
 </style>
 </head>
 <body>
+<!-- Sticker di cuori (definizioni, non visibili) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="gRed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff7a8f"/><stop offset="1" stop-color="#e0214a"/>
+    </linearGradient>
+    <linearGradient id="gPink" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffc4d4"/><stop offset="1" stop-color="#ff6f9a"/>
+    </linearGradient>
+    <path id="heartShape" d="M32 56C10 40 4 28 4 19 4 11 10 6 17 6c6 0 12 3 15 9 3-6 9-9 15-9 7 0 13 5 13 13 0 9-6 21-28 37z"/>
+
+    <symbol id="s-red" viewBox="0 0 64 64">
+      <use href="#heartShape" fill="#fff" stroke="#fff" stroke-width="8" stroke-linejoin="round"/>
+      <use href="#heartShape" fill="url(#gRed)"/>
+      <path d="M14 20c0-4 3-7 7-7" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+    </symbol>
+
+    <symbol id="s-pink" viewBox="0 0 64 64">
+      <use href="#heartShape" fill="#fff" stroke="#fff" stroke-width="8" stroke-linejoin="round"/>
+      <use href="#heartShape" fill="url(#gPink)"/>
+      <path d="M14 20c0-4 3-7 7-7" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+    </symbol>
+
+    <symbol id="s-face" viewBox="0 0 64 64">
+      <use href="#heartShape" fill="#fff" stroke="#fff" stroke-width="8" stroke-linejoin="round"/>
+      <use href="#heartShape" fill="url(#gRed)"/>
+      <path d="M14 20c0-4 3-7 7-7" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+      <circle cx="24" cy="27" r="2.8" fill="#5a0f26"/>
+      <circle cx="40" cy="27" r="2.8" fill="#5a0f26"/>
+      <circle cx="25" cy="26" r="0.9" fill="#fff"/>
+      <circle cx="41" cy="26" r="0.9" fill="#fff"/>
+      <path d="M26 34q6 6 12 0" fill="none" stroke="#5a0f26" stroke-width="2.4" stroke-linecap="round"/>
+      <ellipse cx="17.5" cy="33" rx="3.4" ry="2.2" fill="#ffb3c2" opacity=".85"/>
+      <ellipse cx="46.5" cy="33" rx="3.4" ry="2.2" fill="#ffb3c2" opacity=".85"/>
+    </symbol>
+  </defs>
+</svg>
+
 <div id="hearts" aria-hidden="true"></div>
 
 <main>
   <section id="intro" aria-live="polite">
-    <p id="introText">Questo è un tentativo di phishing</p>
+    <p id="introText">Questo è un tentativo di phishing. Obiettivo: rubarti il cuore</p>
   </section>
 
   <section id="ask" hidden>
@@ -257,8 +316,8 @@
   </section>
 
   <section id="plan" hidden>
-    <h2>Perfettooooooooo <3 <3 <3 <3 <3. Ora organizziamo.</h2>
-    <p class="lead">Scegli l'orario e cosa fare, poi invia la risposta.</p>
+    <h2>Perfettooooooooo <span class="stickers" data-stickers="red,face,pink,red"></span> Ora organizziamo la nostra serata</h2>
+    <p class="lead">Scegli l'orario e cosa facciamo: con te va bene tutto. Poi invia la risposta.</p>
 
     <form id="planForm" novalidate>
       <div style="margin-bottom:1.8rem">
@@ -303,8 +362,8 @@
   </section>
 
   <section id="done" hidden>
-    <h2>Fatto <3</h2>
-    <p>Michele ha ricevuto la tua risposta. Stasera ti riempira di baci, coccole e solletico</p>
+    <h2>Fatto <span class="stickers" data-stickers="face,red,pink"></span></h2>
+    <p>Michele ha ricevuto la tua risposta. Stasera ti riempirà di baci, coccole e solletico. Non vedo l'ora, <span class="nick"></span>.</p>
   </section>
 </main>
 
@@ -312,10 +371,27 @@
   // ⚠️ Metti qui il TUO indirizzo email: è dove arriverà la risposta.
   const EMAIL = "michele.castrucci002@gmail.com";
 
+  // Come la chiami di solito: cambia questa parola e si aggiorna in tutta la pagina.
+  const SOPRANNOME = "amore";
+
   const $ = (id) => document.getElementById(id);
   const body = document.body;
   const hearts = $("hearts");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- Sticker di cuori ---------- */
+  function renderStickers(root) {
+    const rots = [-9, 6, -4, 8, -7];
+    root.querySelectorAll("[data-stickers]").forEach((el) => {
+      if (el.dataset.done) return;
+      el.dataset.done = "1";
+      el.innerHTML = el.dataset.stickers.split(",").map((id, i) =>
+        '<svg class="sticker" aria-hidden="true" style="--r:' + rots[i % rots.length] + 'deg;--i:' + i + '"><use href="#s-' + id + '"></use></svg>'
+      ).join("");
+    });
+  }
+  document.querySelectorAll(".nick").forEach((n) => { n.textContent = SOPRANNOME; });
+  renderStickers(document);
 
   /* ---------- Cuoricini ---------- */
   function fillHearts() {
@@ -348,7 +424,12 @@
     $("themeColor").setAttribute("content", "#3e7a5b");
     introText.classList.add("fade");
     setTimeout(() => {
-      introText.textContent = "Scherzo, mi ha programmato Micheleeeee <3 <3 <3 <3";
+      introText.textContent = "Scherzo, " + SOPRANNOME + ": mi ha programmato Micheleeeee ";
+      const st = document.createElement("span");
+      st.className = "stickers";
+      st.dataset.stickers = "red,face,pink,red";
+      introText.appendChild(st);
+      renderStickers(introText);
       introText.classList.add("alt");
       introText.classList.remove("fade");
 
