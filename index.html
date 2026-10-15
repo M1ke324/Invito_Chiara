@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -5,10 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#000000" id="themeColor">
 <meta name="format-detection" content="telephone=no">
-<title>Una domanda per stasera</title>
+<title>1 mese assieme</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Space+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Space+Mono&family=Dancing+Script:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --black: #000;
@@ -33,6 +34,28 @@
     overflow-x: hidden;
   }
   body.calm { background: var(--calm); color: var(--white); }
+
+  /* Sfondo notturno della lettera */
+  #night {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.6s ease;
+    background:
+      radial-gradient(1.5px 1.5px at 12% 14%, rgba(255,255,255,.7), transparent),
+      radial-gradient(1px 1px at 78% 9%, rgba(255,255,255,.6), transparent),
+      radial-gradient(1.5px 1.5px at 90% 33%, rgba(255,255,255,.5), transparent),
+      radial-gradient(1px 1px at 6% 52%, rgba(255,255,255,.5), transparent),
+      radial-gradient(1.5px 1.5px at 24% 86%, rgba(255,255,255,.6), transparent),
+      radial-gradient(1px 1px at 70% 90%, rgba(255,255,255,.5), transparent),
+      radial-gradient(1px 1px at 48% 5%, rgba(255,255,255,.5), transparent),
+      radial-gradient(60% 40% at 50% 46%, rgba(130,118,205,.30), transparent 72%),
+      linear-gradient(#111528, #1d1c3a 55%, #2b2247);
+    background-color: #161a30;
+  }
+  #night.on { opacity: 1; }
 
   /* Cuoricini */
   #hearts {
@@ -101,7 +124,79 @@
   #introText.alt::after { content: none; }
   @keyframes blink { 50% { opacity: 0; } }
 
-  /* Schermata 2: la domanda */
+  /* Schermata 2: la lettera */
+  #letter { --w: min(86vw, 380px); --ink: #1f2a5a; }
+  #letter .env { position: relative; width: var(--w); height: calc(var(--w) * .68); }
+  #letter .env > * { position: absolute; }
+  #letter .back { inset: 0; z-index: 1; border-radius: 5px; background: #a3b0cc; box-shadow: 0 22px 44px rgba(0,0,0,.5); }
+  #letter .front { inset: 0; z-index: 3; border-radius: 5px; overflow: hidden; }
+  #letter .front svg, #letter .face svg { display: block; width: 100%; height: 100%; }
+  #letter .flap-wrap { left: 0; top: 0; width: 100%; height: 54.9%; z-index: 4; perspective: 900px; pointer-events: none; }
+  #letter .flap { position: absolute; inset: 0; transform-style: preserve-3d; -webkit-transform-style: preserve-3d; transform-origin: 50% 0; }
+  #letter .face { position: absolute; inset: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+  #letter .face.in { transform: rotateY(180deg); }
+
+  #letter .seal {
+    left: 50%; top: 54.9%; z-index: 6;
+    width: calc(var(--w) * .24); min-width: 0; min-height: 0;
+    padding: 0; border: 0; border-radius: 0; background: none;
+    transform: translate(-50%, -50%);
+    transition: none;
+    filter: drop-shadow(0 4px 5px rgba(0,0,0,.35));
+    animation: beat 2.4s ease-in-out infinite;
+  }
+  #letter .seal svg { display: block; width: 100%; height: auto; }
+
+  #letter .paper {
+    left: 5%; width: 90%; top: 50%; z-index: 2;
+    padding: calc(var(--w) * .085) calc(var(--w) * .075);
+    transform: translateY(-50%) scale(.46);
+    background: #fffdf7; border-radius: 3px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.4);
+    font-family: "Dancing Script", "Snell Roundhand", "Apple Chancery", cursive;
+    font-weight: 500; font-size: calc(var(--w) * .062); line-height: 1.5; color: var(--ink);
+  }
+  #letter .paper p { margin: 0; opacity: 0; }
+  #letter .paper .close { margin-top: 1.1em; }
+  #letter .paper .sign { margin-top: .1em; text-align: right; font-size: 1.7em; line-height: 1.3; font-weight: 600; }
+
+  #letter .next {
+    left: 0; right: 0; margin: 0 auto; width: max-content; z-index: 6;
+    top: calc(100% + var(--w) * .12);
+    opacity: 0;
+  }
+
+  /* sequenza della lettera: parte con .go */
+  #letter.go .seal { animation: peel 1.4s ease-in forwards; }
+  #letter.go .flap { animation: open 3.6s cubic-bezier(.5,.05,.25,1) 1.2s forwards; }
+  #letter.go .flap-wrap { animation: flapz .01s linear 3s forwards, sink 2.4s ease-in-out 8s forwards; }
+  #letter.go .back, #letter.go .front { animation: sink 2.4s ease-in-out 8s forwards; }
+  #letter.go .paper { animation: lift 7s 4.4s forwards; }
+  #letter.go .paper p { animation: ink 2s ease forwards; }
+  #letter.go .r1 { animation-delay: 10.4s; }
+  #letter.go .r2 { animation-delay: 12s; }
+  #letter.go .r3 { animation-delay: 13.4s; }
+  #letter.go .next { animation: ink 1.2s ease 15.2s forwards; }
+  #letter.done .paper { animation: none; transform: translateY(-50%); }
+
+  @keyframes beat { 0%,100% { transform: translate(-50%,-50%) scale(1); } 14% { transform: translate(-50%,-50%) scale(1.08); } 28% { transform: translate(-50%,-50%) scale(1); } 42% { transform: translate(-50%,-50%) scale(1.06); } 70% { transform: translate(-50%,-50%) scale(1); } }
+  @keyframes peel {
+    0% { transform: translate(-50%,-50%) scale(1) rotate(0); opacity: 1; }
+    40% { transform: translate(-50%,-56%) scale(1.15) rotate(-6deg); opacity: 1; }
+    100% { transform: translate(-50%,-80%) scale(1.05) rotate(-14deg); opacity: 0; }
+  }
+  @keyframes open { from { transform: rotateX(0); } to { transform: rotateX(180deg); } }
+  @keyframes flapz { from { z-index: 4; } to { z-index: 1; } }
+  @keyframes sink { to { opacity: 0; transform: translateY(calc(var(--w) * .18)); } }
+  @keyframes lift {
+    0% { transform: translateY(-50%) scale(.46); animation-timing-function: cubic-bezier(.4,0,.2,1); }
+    57% { transform: translateY(calc(-50% - var(--w) * .45)) scale(.78); }
+    66% { transform: translateY(calc(-50% - var(--w) * .45)) scale(.78); animation-timing-function: cubic-bezier(.4,0,.2,1); }
+    100% { transform: translateY(-50%) scale(1); }
+  }
+  @keyframes ink { to { opacity: 1; } }
+
+  /* Schermata 3: la domanda */
   #ask { text-align: center; max-width: 36rem; }
   #ask h1 {
     margin: 0 0 1rem;
@@ -110,13 +205,6 @@
     line-height: 1.12;
     text-shadow: 0 2px 18px rgba(30, 70, 50, .55);
     animation: rise .7s ease both;
-  }
-  #ask .sweet {
-    margin: 0 0 2.2rem;
-    font-size: clamp(1.1rem, 4vw, 1.4rem);
-    line-height: 1.5;
-    text-shadow: 0 2px 14px rgba(30, 70, 50, .55);
-    animation: rise .7s ease .2s both;
   }
   @keyframes rise { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }
 
@@ -146,7 +234,7 @@
   .secondary:hover { background: rgba(255, 255, 255, .15); }
   #no.gone { opacity: 0; scale: .6; pointer-events: none; }
 
-  /* Schermata 3: il form */
+  /* Schermata 4: il form */
   #plan { width: 100%; max-width: 40rem; }
   #plan h2 {
     margin: 0 0 .4rem;
@@ -254,10 +342,12 @@
   #done p { margin: 0; font-size: 1.2rem; }
 
   @media (prefers-reduced-motion: reduce) {
-    body, #introText, button, .option, #hearts { transition-duration: .01s; }
+    body, #introText, button, .option, #hearts, #night { transition-duration: .01s; }
     .heart { animation: pop .01s linear var(--delay) forwards; }
-    #ask h1, #ask .sweet, .sticker { animation: none; }
+    #ask h1, .sticker { animation: none; }
     #introText::after { animation: none; }
+    #letter .seal { animation: none; }
+    #letter.go * { animation-duration: .01s !important; animation-delay: 0s !important; }
   }
 </style>
 </head>
@@ -300,11 +390,55 @@
   </defs>
 </svg>
 
+<div id="night" aria-hidden="true"></div>
 <div id="hearts" aria-hidden="true"></div>
 
 <main>
   <section id="intro" aria-live="polite">
     <p id="introText">Questo è un tentativo di phishing</p>
+  </section>
+
+  <section id="letter" hidden>
+    <div class="env">
+      <div class="back"></div>
+
+      <article class="paper" aria-label="Lettera">
+        <p class="r1">Sono felicissimo di questo mese passato con te, spero sia il primo di tanti.</p>
+        <p class="r2 close">Con affetto e immensa gioia,</p>
+        <p class="r3 sign">Michele</p>
+      </article>
+
+      <div class="front">
+        <svg viewBox="0 0 300 204" preserveAspectRatio="none" aria-hidden="true">
+          <polygon points="0,204 150,110 300,204" fill="#eef1f7"/>
+          <polygon points="0,0 150,110 0,204" fill="#e1e6f0"/>
+          <polygon points="300,0 150,110 300,204" fill="#d6ddea"/>
+          <polyline points="0,204 150,110 300,204" fill="none" stroke="#c3cbdd" stroke-width="1"/>
+          <polyline points="0,0 150,110 300,0" fill="none" stroke="#c3cbdd" stroke-width="1"/>
+        </svg>
+      </div>
+
+      <div class="flap-wrap">
+        <div class="flap">
+          <div class="face out">
+            <svg viewBox="0 0 300 112" preserveAspectRatio="none" aria-hidden="true">
+              <polygon points="0,0 300,0 150,112" fill="#ebeff6" stroke="#c3cbdd" stroke-width="1"/>
+            </svg>
+          </div>
+          <div class="face in">
+            <svg viewBox="0 0 300 112" preserveAspectRatio="none" aria-hidden="true">
+              <polygon points="0,0 300,0 150,112" fill="#8f9fc1"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <button class="seal" id="seal" type="button" aria-label="Apri la lettera">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><use href="#s-red"></use></svg>
+      </button>
+
+      <button class="primary next" id="next" type="button" disabled>Continua</button>
+    </div>
   </section>
 
   <section id="ask" hidden>
@@ -329,13 +463,13 @@
         <legend>Cosa facciamo?</legend>
 
         <label class="option">
-          <input type="radio" name="attivita" value="Escape Room">
-          <span>Escape Room</span>
+          <input type="radio" name="attivita" value="Ristorante indiano">
+          <span>Ristorante indiano</span>
         </label>
 
         <label class="option">
           <input type="radio" name="attivita" value="Cinema: ridanno Il Dottor Stranamore">
-          <span>Al cinema ridanno <em>Il Dottor Stranamore</em>, un film che mi piacerebbe molto vedere ma è impegnativo</span>
+          <span>Al cinema danno <em>Primetime</em> e <em>L'estranea</em>, entrambi bei film che mi piacerebbe vedere</span>
         </label>
 
         <label class="option">
@@ -345,7 +479,7 @@
 
         <label class="option">
           <input type="radio" name="attivita" value="Serata pizza, birra e film in camera sua (Harry Potter)">
-          <span>Serata pizza, birra e film in camera mia, sotto la mia nuova bellissima coperta. Si potrebbe guardare Harry Potter: tu volevi fare un rewatch e io non l'ho mai visto</span>
+          <span>Dato che siamo usciti già mercoledì possiamo fare una serata più intima con pizza, birra e film in camera mia, sotto la mia nuova bellissima coperta. Si potrebbe guardare Harry Potter: tu volevi fare un rewatch e io non l'ho mai visto</span>
         </label>
 
         <label class="option open">
@@ -368,15 +502,13 @@
 </main>
 
 <script>
-  // ⚠️ Metti qui il TUO indirizzo email: è dove arriverà la risposta.
+  // Indirizzo email dove arriverà la risposta.
   const EMAIL = "michele.castrucci002@gmail.com";
-
-  // Come la chiami di solito: cambia questa parola e si aggiorna in tutta la pagina.
-  const SOPRANNOME = "amore";
 
   const $ = (id) => document.getElementById(id);
   const body = document.body;
   const hearts = $("hearts");
+  const themeMeta = $("themeColor");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ---------- Sticker di cuori ---------- */
@@ -390,7 +522,6 @@
       ).join("");
     });
   }
-  document.querySelectorAll(".nick").forEach((n) => { n.textContent = SOPRANNOME; });
   renderStickers(document);
 
   /* ---------- Cuoricini ---------- */
@@ -415,13 +546,59 @@
     }
   }
 
+  /* ---------- Lettera ---------- */
+  const letter = $("letter");
+  const night = $("night");
+  const next = $("next");
+  let letterStarted = false;
+  let letterTimer;
+
+  function startLetter() {
+    if (letterStarted) return;
+    letterStarted = true;
+    clearTimeout(letterTimer);
+    letter.classList.add("go");
+  }
+
+  function showLetter() {
+    $("intro").hidden = true;
+    letter.hidden = false;
+    night.classList.add("on");
+    themeMeta.setAttribute("content", "#161a30");
+    letterTimer = setTimeout(startLetter, reduceMotion ? 0 : 2600);
+  }
+
+  $("seal").addEventListener("click", startLetter);
+
+  letter.addEventListener("animationend", (e) => {
+    if (e.animationName === "lift") letter.classList.add("done");
+    if (e.target === next && e.animationName === "ink") {
+      next.disabled = false;
+      next.focus({ preventScroll: true });
+    }
+  });
+
+  next.addEventListener("click", () => {
+    next.disabled = true;
+    letter.style.transition = "opacity .8s ease";
+    letter.style.opacity = "0";
+    setTimeout(() => {
+      letter.hidden = true;
+      night.classList.remove("on");
+      themeMeta.setAttribute("content", "#3e7a5b");
+      $("ask").hidden = false;
+      fillHearts();
+      $("yes").focus({ preventScroll: true });
+    }, reduceMotion ? 20 : 800);
+  });
+
   /* ---------- Sequenza iniziale ---------- */
   const introText = $("introText");
 
   // dopo 5 secondi: sfondo verde rilassante e nuova scritta
   setTimeout(() => {
     body.classList.add("calm");
-    $("themeColor").setAttribute("content", "#3e7a5b");
+    themeMeta.setAttribute("content", "#3e7a5b");
     introText.classList.add("fade");
     setTimeout(() => {
       introText.textContent = "Scherzo, mi ha programmato Micheleeeee ";
@@ -433,13 +610,8 @@
       introText.classList.add("alt");
       introText.classList.remove("fade");
 
-      // dopo altri 2 secondi: cuoricini e domanda
-      setTimeout(() => {
-        $("intro").hidden = true;
-        $("ask").hidden = false;
-        fillHearts();
-        $("yes").focus({ preventScroll: true });
-      }, 2000);
+      // dopo altri 4 secondi: la lettera
+      setTimeout(showLetter, 4000);
     }, reduceMotion ? 20 : 600);
   }, 5000);
 
@@ -541,3 +713,5 @@
 </script>
 </body>
 </html>
+
+</body></html>
